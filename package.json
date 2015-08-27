@@ -1,0 +1,27 @@
+{
+  "name": "react-tab-index",
+  "version": "1.0.0",
+  "description": "TabIndex management in React application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nemisj/react-tab-index.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nemisj/react-tab-index/issues"
+  },
+  "homepage": "https://github.com/nemisj/react-tab-index",
+  "dependencies": {
+    "babel": "^5.8.21",
+    "react": "^0.13.3",
+    "webpack": "^1.12.0"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "^1.10.1"
+  }
+}
