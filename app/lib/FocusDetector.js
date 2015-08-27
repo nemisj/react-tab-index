@@ -82,6 +82,6 @@ function getNextSibling(children, child) {
 }
 
 module.exports = {
-  findNextFocusedNode: findNextFocusedNode
-
+  findNextFocusedNode: findNextFocusedNode,
+  buildIndexMap: buildIndexMap
 };

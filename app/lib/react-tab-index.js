@@ -1,12 +1,30 @@
+//XXX: and what if parent is without tabIndex? which next tab index to use for nextSibling and nextLevel?
+
 var ViewModel = require('./ViewModel.js');
 var FocusDetector = require('./FocusDetector.js');
+
+function getFirstFocusableNode(node) {
+
+  if (!node.compositeComponent) {
+    // it's a composite component and we should take the real value
+    return node;
+  }
+
+  var parent = node;
+
+  var indexMap = FocusDetector.buildIndexMap(parent);
+  // take the first item from the index map
+  console.log('map for the current parent is', indexMap);
+
+  var firstTabIndex = indexMap.order[0];
+
+  return  getFirstFocusableNode(indexMap.map[firstTabIndex][0]);
+}
 
 module.exports = {
   track: function (targetNode) {
 
     var focusViewModel = ViewModel.create();
-
-    console.log('focusViewModel', focusViewModel);
 
     // console.log(JSON.stringify(rootChildren, null, 2));
     var currentReactId = targetNode.getAttribute('data-reactid');
@@ -26,17 +44,15 @@ module.exports = {
       var currentTabIndex = currentLowestNode.tabIndex;
       console.log('what is node', currentLowestNode, parentStack, currentTabIndex);
 
-      //XXX: and what if parent is without tabIndex? which next tab index to use for nextSibling and nextLevel?
       //
       // searching for the next item
       var currentParent = parentStack.pop();
       while (currentParent) {
         var nextNode = FocusDetector.findNextFocusedNode(currentParent, currentLowestNode);
         if (nextNode) {
-          console.log('Found next node', nextNode)
-          return;
+          return getFirstFocusableNode(nextNode);
         } else {
-          console.log('Have search in a parent');
+          // Have to search in a parent
           currentLowestNode = currentParent;
           currentParent = parentStack.pop();
           console.log('will use currentParent as lowest node', currentLowestNode, currentParent);

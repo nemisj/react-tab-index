@@ -16,6 +16,14 @@ window.onkeydown = function (evt) {
   }
 
   var targetNode = evt.target;
-  indexer.track(targetNode);
+  var node = indexer.track(targetNode);
+
+  console.log('node to focus is', node);
+
+  if (node) {
+    setTimeout(function () {
+      node.domNode.focus();
+    }, 10);
+  }
 
 };
