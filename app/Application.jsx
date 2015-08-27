@@ -25,10 +25,11 @@ function nt(Component) {
       console.log('nt2', this.props);
 
       return (
-        <h1 tabIndex="1">
+
+        <div5 tabIndex="1">
           <h2 tabIndex="2"></h2>
           <Component lolipop="blabla" tabIndex="1">{this.children}</Component>
-        </h1>
+        </div5>
       );
     },
 
