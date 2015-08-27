@@ -1,3 +1,5 @@
+'use strict';
+
 var React = require('react');
 
 var Child = React.createClass({
@@ -27,21 +29,6 @@ var Child = React.createClass({
   }
 });
 
-
-'use strict';
-var indexer = require('./react-tab-index.js');
-
-if (typeof window != 'undefined') {
-  window.onkeydown = function (evt) {
-    if (evt.keyCode != '32') {
-      return;
-    }
-
-    var targetNode = evt.target;
-    indexer.track(targetNode);
-
-  };
-}
 
 function t(Component) {
   var Transparent = React.createClass({
