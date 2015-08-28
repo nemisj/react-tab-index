@@ -22,7 +22,37 @@ function getFirstFocusableNode(node) {
 }
 
 module.exports = {
-  track: function (targetNode) {
+
+  findPrev: function (parentStack, currentLowestNode) {
+      // searching for the next item
+      var currentParent = parentStack.pop();
+
+      var prevNode = FocusDetector.findPrevFocusedNode(currentParent, currentLowestNode);
+
+      console.log('new node is', prevNode);
+
+      return prevNode;
+  },
+
+  findNext: function (parentStack, currentLowestNode) {
+      // searching for the next item
+      var currentParent = parentStack.pop();
+
+      while (currentParent) {
+        var nextNode = FocusDetector.findNextFocusedNode(currentParent, currentLowestNode);
+        if (nextNode) {
+          return getFirstFocusableNode(nextNode);
+        } else {
+          // Have to search in a parent
+          currentLowestNode = currentParent;
+          currentParent = parentStack.pop();
+          console.log('will use currentParent as lowest node', currentLowestNode, currentParent);
+
+        }
+      }
+  },
+
+  track: function (targetNode, back) {
 
     var focusViewModel = ViewModel.create();
 
@@ -41,24 +71,13 @@ module.exports = {
 
 
       // IMPORTANT: targetNode.tabIndex should be the same as currentTabIndex
-      var currentTabIndex = currentLowestNode.tabIndex;
-      console.log('what is node', currentLowestNode, parentStack, currentTabIndex);
-
-      //
-      // searching for the next item
-      var currentParent = parentStack.pop();
-      while (currentParent) {
-        var nextNode = FocusDetector.findNextFocusedNode(currentParent, currentLowestNode);
-        if (nextNode) {
-          return getFirstFocusableNode(nextNode);
-        } else {
-          // Have to search in a parent
-          currentLowestNode = currentParent;
-          currentParent = parentStack.pop();
-          console.log('will use currentParent as lowest node', currentLowestNode, currentParent);
-
-        }
+      // var currentTabIndex = currentLowestNode.tabIndex;
+      if (!back) {
+        return module.exports.findNext(parentStack, currentLowestNode);
+      } else {
+        return module.exports.findPrev(parentStack, currentLowestNode);
       }
+
 
     } else {
       console.log('not a react node');

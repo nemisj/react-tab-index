@@ -10,13 +10,18 @@ window.onload = function () {
   });
 }
 
+var TAB = 9;
+var SPACE = 32;
+
 window.onkeydown = function (evt) {
-  if (evt.keyCode != '32') {
+  if (evt.keyCode != TAB) {
     return;
   }
 
+  evt.preventDefault();
+
   var targetNode = evt.target;
-  var node = indexer.track(targetNode);
+  var node = indexer.track(targetNode, evt.shiftKey);
 
   console.log('node to focus is', node);
 

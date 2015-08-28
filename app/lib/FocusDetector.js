@@ -29,23 +29,50 @@ function buildIndexMap(parent) {
   return result;
 }
 
+// Searches for previous node to focus in the same parent
+function findPrevFocusedNode(parent, focusedNode) {
+  var currentTabIndex = focusedNode.tabIndex;
+  var indexMap = buildIndexMap(parent);
+
+  // 1. walk through the rest(siblings) of the nodes
+  // where tabIndex is the same
+  var prevSibling = getPrevSibling(indexMap.map[currentTabIndex], focusedNode);
+
+  if (prevSibling) {
+    console.log('prevSibling is', prevSibling)
+    return prevSibling;
+  }
+
+  // 2. find node with lower tab-index in the same parent
+  var prevIndex = indexMap
+    // reverse order of the map
+    .order.reverse() 
+    // filter out all the values above the current tabindex
+    .filter(function (index) {
+      return index < currentTabIndex;
+    })
+    .shift();
+
+  var prevLevel = indexMap.map[prevIndex];
+
+  // taking the first element of the nextLevel elements
+  prevSibling = prevLevel[prevLevel.length -1];
+  if (prevSibling) {
+    console.log('Found child in previous level');
+    // we have to fall through into the first child there
+    return prevSibling;
+  }
+
+  return null;
+}
+
+// Searches for next node to focus in the same parent
 function findNextFocusedNode(parent, focusedNode) {
   var currentTabIndex = focusedNode.tabIndex;
   var indexMap = buildIndexMap(parent);
-  console.log('indexMap is', indexMap);
-
-  // filter out all the values below
-  indexMap.order = indexMap.order.filter(function (index) {
-    return index >= currentTabIndex;
-  });
-
-  // take out the current tabIndexitem
-  indexMap.order.shift();
-
-  console.log('indexMap starts from', indexMap);
 
   // 1. walk through the rest(siblings) of the nodes
-  // when tabIndex is the same
+  // where tabIndex is the same
   var nextSibling = getNextSibling(indexMap.map[currentTabIndex], focusedNode);
 
   if (nextSibling) {
@@ -56,10 +83,19 @@ function findNextFocusedNode(parent, focusedNode) {
   }
 
   // 2. Find child with increased tabIndex
-  // taking the next first item from array
-  var nextLevel = indexMap.map[indexMap.order[0]];
+  // by taking the next first item from array
+  var nextIndex = indexMap.order 
+    // filter out all the values below current tabindex
+    .filter(function (index) {
+      return index > currentTabIndex;
+    })
+    // taking the first element
+    .shift();
+
+  var nextLevel = indexMap.map[nextIndex];
+
   // taking the first element of the nextLevel elements
-  var nextFocusedChild = nextLevel ? nextLevel[0] : null;
+  var nextFocusedChild = nextLevel[0];
   if (nextFocusedChild) {
     console.log('Found child in nextLevel');
     // we have to fall through into the first child there
@@ -69,6 +105,13 @@ function findNextFocusedNode(parent, focusedNode) {
   // 3. Not found? Go up to the parent and repeat 
   console.log('Will have to search in the parent');
   return null;
+}
+
+function getPrevSibling(children, child) {
+  // reverse them and do getNextSibling
+  children = children.reverse();
+
+  return getNextSibling(children, child);
 }
 
 function getNextSibling(children, child) {
@@ -83,5 +126,6 @@ function getNextSibling(children, child) {
 
 module.exports = {
   findNextFocusedNode: findNextFocusedNode,
+  findPrevFocusedNode: findPrevFocusedNode,
   buildIndexMap: buildIndexMap
 };
