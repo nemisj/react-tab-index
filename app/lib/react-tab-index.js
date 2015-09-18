@@ -3,23 +3,14 @@
 var ViewModel = require('./ViewModel.js');
 var FocusDetector = require('./FocusDetector.js');
 
-function getFirstFocusableNode(node) {
-
+function getLastFocusableNode(node) {
   if (!node.compositeComponent) {
-    // it's a composite component and we should take the real value
     return node;
   }
 
-  var parent = node;
-
-  var indexMap = FocusDetector.buildIndexMap(parent);
-  // take the first item from the index map
-  console.log('map for the current parent is', indexMap);
-
-  var firstTabIndex = indexMap.order[0];
-
-  return  getFirstFocusableNode(indexMap.map[firstTabIndex][0]);
+  return null;
 }
+
 
 module.exports = {
 
@@ -27,11 +18,21 @@ module.exports = {
       // searching for the next item
       var currentParent = parentStack.pop();
 
-      var prevNode = FocusDetector.findPrevFocusedNode(currentParent, currentLowestNode);
+      while (currentParent) {
+        var nextNode = FocusDetector.findPrevFocusedNode(currentParent, currentLowestNode);
 
-      console.log('new node is', prevNode);
+        if (nextNode) {
+          // nextNode is not composite, it's for sure a child
+          console.log('found node to focus', nextNode);
+          return nextNode;
+        } else {
+          // Have to search in a parent
+          currentLowestNode = currentParent;
+          currentParent = parentStack.pop();
+          console.log('will use currentParent as lowest node', currentLowestNode, currentParent);
 
-      return prevNode;
+        }
+      }
   },
 
   findNext: function (parentStack, currentLowestNode) {
@@ -41,7 +42,9 @@ module.exports = {
       while (currentParent) {
         var nextNode = FocusDetector.findNextFocusedNode(currentParent, currentLowestNode);
         if (nextNode) {
-          return getFirstFocusableNode(nextNode);
+          // nextNode is not composite, it's for sure a child
+          console.log('found node to focus', nextNode);
+          return nextNode;
         } else {
           // Have to search in a parent
           currentLowestNode = currentParent;

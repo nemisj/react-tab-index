@@ -33,73 +33,168 @@ function buildIndexMap(parent) {
 function findPrevFocusedNode(parent, focusedNode) {
   var currentTabIndex = focusedNode.tabIndex;
   var indexMap = buildIndexMap(parent);
+  var childrenByIndex = indexMap.map;
+
+  // node which is going to be focused after the focusedNode
+  var nodeToFocus;
+
+  // needed to filter out all the next-siblings
+  var foundNode = true;
 
   // 1. walk through the rest(siblings) of the nodes
-  // where tabIndex is the same
-  var prevSibling = getPrevSibling(indexMap.map[currentTabIndex], focusedNode);
+  // where tabIndex is the same and take the node which is focusable
+  // this means, that it shouldn't be compositeComponent
+  // but the real one
+  // takeout all the nextSiblings from the map
+  childrenByIndex[currentTabIndex] = childrenByIndex[currentTabIndex]
+    .filter(function (child) {
+      var isSame = (child.rootNodeId == focusedNode.rootNodeId) && (child.nodeName == focusedNode.nodeName);
 
-  if (prevSibling) {
-    console.log('prevSibling is', prevSibling)
-    return prevSibling;
+      // first we return true, before node found
+      if (foundNode) {
+        // till we find the cutting point
+        if (isSame) {
+          foundNode = false;
+          return false;
+        }
+
+        return true;
+      }
+
+      // then we return false
+      return false;
+  });
+
+  nodeToFocus = b({
+    order: [ currentTabIndex ],
+    map: childrenByIndex
+  }, true);
+
+  if (nodeToFocus) {
+    return nodeToFocus;
   }
 
-  // 2. find node with lower tab-index in the same parent
-  var prevIndex = indexMap
-    // reverse order of the map
-    .order.reverse() 
-    // filter out all the values above the current tabindex
+  // 2. Find all children with dicreased tabIndex
+  // and replace the order
+  var indeces = indexMap.order 
+    // filter out all the values above current tabindex
     .filter(function (index) {
       return index < currentTabIndex;
     })
-    .shift();
 
-  var prevLevel = indexMap.map[prevIndex];
+  nodeToFocus = b({
+    order: indeces,
+    map: childrenByIndex
+  }, true);
 
-  // taking the first element of the nextLevel elements
-  prevSibling = prevLevel[prevLevel.length -1];
-  if (prevSibling) {
-    console.log('Found child in previous level');
-    // we have to fall through into the first child there
-    return prevSibling;
+  if (nodeToFocus) {
+    return nodeToFocus;
   }
 
+  // 3. Not found? Go up to the parent and repeat 
+  console.log('Will have to search in the parent');
   return null;
+
+}
+
+function a(node, reverse) {
+  if (!node.compositeComponent) {
+    // it's a composite component and we should take the real value
+    return node;
+  }
+
+  var indexMap = buildIndexMap(node);
+
+  return b(indexMap, reverse);
+}
+
+function b(indexMap, reverse) {
+
+  var nodeToFocus = null;
+
+  var order = indexMap.order;
+  var childrenByIndex = indexMap.map;
+
+  // go through all the tabindexes 
+  // and find the first correct child
+  var orderIndex;
+
+  if (reverse) {
+    order = order.reverse();
+  }
+
+  order.some(function (tabIndex) {
+    var children = childrenByIndex[tabIndex];
+    if (children) {
+      if (reverse) {
+        children = children.reverse();
+      }
+
+      return children.some(function (child) {
+        nodeToFocus = a(child, reverse);
+        return !!nodeToFocus;
+      });
+    }
+  });
+
+  // there are no children in there
+  return nodeToFocus;
 }
 
 // Searches for next node to focus in the same parent
 function findNextFocusedNode(parent, focusedNode) {
   var currentTabIndex = focusedNode.tabIndex;
   var indexMap = buildIndexMap(parent);
+  var childrenByIndex = indexMap.map;
+
+  // node which is going to be focused after the focusedNode
+  var nodeToFocus;
+
+  // needed to filter out all the prev-siblings
+  var foundNode = false;
 
   // 1. walk through the rest(siblings) of the nodes
-  // where tabIndex is the same
-  var nextSibling = getNextSibling(indexMap.map[currentTabIndex], focusedNode);
+  // where tabIndex is the same and take the node which is focusable
+  // this means, that it shouldn't be compositeComponent
+  // but the real one
+  // takeout all the prevSibling from the map
+  childrenByIndex[currentTabIndex] = childrenByIndex[currentTabIndex].filter(function (child) {
+      var isSame = (child.rootNodeId == focusedNode.rootNodeId) &&
+          (child.nodeName == focusedNode.nodeName);
+    if (foundNode) { 
+      return true;
+    } else if (isSame) {
+      foundNode = true;
+    }
 
-  if (nextSibling) {
-    console.log('Found child as nextSibling');
-    // this node can be compositeComponent which means
-    // we have to fall through into the first child there
-    return nextSibling;
+    return false;
+  });
+
+  nodeToFocus = b({
+    order: [ currentTabIndex ],
+    map: childrenByIndex
+  });
+
+  if (nodeToFocus) {
+    return nodeToFocus;
   }
 
-  // 2. Find child with increased tabIndex
-  // by taking the next first item from array
-  var nextIndex = indexMap.order 
+  // 2. Find all children with increased tabIndex
+  // and replace the order
+  var indeces = indexMap.order 
     // filter out all the values below current tabindex
     .filter(function (index) {
       return index > currentTabIndex;
-    })
-    // taking the first element
-    .shift();
+    });
 
-  var nextLevel = indexMap.map[nextIndex];
 
-  // taking the first element of the nextLevel elements
-  var nextFocusedChild = nextLevel[0];
-  if (nextFocusedChild) {
-    console.log('Found child in nextLevel');
-    // we have to fall through into the first child there
-    return nextFocusedChild;
+  nodeToFocus = b({
+    order: indeces,
+    map: childrenByIndex
+  });
+
+  if (nodeToFocus) {
+    return nodeToFocus;
   }
 
   // 3. Not found? Go up to the parent and repeat 
@@ -107,25 +202,9 @@ function findNextFocusedNode(parent, focusedNode) {
   return null;
 }
 
-function getPrevSibling(children, child) {
-  // reverse them and do getNextSibling
-  children = children.reverse();
-
-  return getNextSibling(children, child);
-}
-
-function getNextSibling(children, child) {
-  for (var i = 0; i < children.length; i++) {
-    var aChild = children[i];
-    if (aChild == child) {
-      return children[i + 1];
-    }
-  }
-  return null;
-}
-
 module.exports = {
   findNextFocusedNode: findNextFocusedNode,
   findPrevFocusedNode: findPrevFocusedNode,
-  buildIndexMap: buildIndexMap
+  a: a,
+  b: b
 };
