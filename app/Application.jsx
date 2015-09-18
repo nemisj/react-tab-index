@@ -38,6 +38,13 @@ function nt(Component) {
   return NonTransparent;
 }
 
+var NoChildren = React.createClass({
+  displayName:'NoChildren',
+  render() {
+    return <div>No tabIndexed</div>;
+  }
+});
+
 var Child2 = nt(Transparent);
 
 var Application = React.createClass({
@@ -76,7 +83,9 @@ var Application = React.createClass({
         <div tabIndex="1">Application.tabIndex=1</div>
         <div><input type="text" tabIndex="2" value="Application.tabIndex=2"/></div>
         <div tabIndex="1">Application.tabIndex=1</div>
-        --
+        -- no children --
+        <NoChildren tabIndex="1"/>
+        -- !- no children
         <div>
           <Transparent tabIndex="3">Application.tabIndex=3</Transparent>
         </div>
