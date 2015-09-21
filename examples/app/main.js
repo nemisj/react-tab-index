@@ -1,6 +1,6 @@
 var React = require('react');
 var Application = require('./Application.jsx');
-var indexer = require('./lib/react-tab-index.js');
+var indexer = require('../../lib/react-tab-index.js');
 
 var mountNode = document.getElementById('application');
 
