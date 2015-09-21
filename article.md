@@ -184,19 +184,33 @@ View of the 'Controls' component:
 </div>
 ```
 
-After assembling application it would in the browser something like this:
+After assembling this application it would look like this: ( with comments I
+have highlithed where components starts and end )
 
 ```html
 <html>
+  <!-- Page -->
   <body>
+
+    <!-- Form -->
     <div>
       User name: <input type="text" name="userame" />
-      Password: <input type="text" name="password" />
+      Password: <input type="password" name="password" />
     </div>
+    <!-- /Form -->
+
+    <!-- Controls -->
     <div>
       <button value="Login" />
       <button value="Forgot password" />
     </div>
+    <!-- /Controls -->
+
   </body>
+
+  <!-- /Page -->
+
 </html>
 ```
+
+
