@@ -133,12 +133,14 @@ normalization of the focus order.  Let's look at the HTML from above but with ad
 ```
 
 
+(expalain about tabIndex on non focusable elements)
+
 ## Why it won't work now
 
 Before diving into the problem itself, let's see what does it mean component
 based architecture for the browser.
 
-Usually when application created using component based architecture UI of this applicatio is constructed of multiple smaller componests. Every component is an isolated unit containing all the required assets for it to run, such as view fragment, javascript, css and images. View fragment can be of any format, but most of the time it represents HTMLish tree of nodes, XML or any other SDL defined by the framework creator e.g., JSX is used in ReactJS and (Java example would also be nice) XML is used in BackBase.
+Usually when application created using component based architecture UI of this applicatio is constructed of multiple smaller componests. Every component is an isolated unit containing all the required assets for it to run, such as view fragment, javascript, css and images. View fragment can be of any format, but most of the time it represents HTMLish tree of nodes, XML or any other Domai Specific Language (DSL) defined by the framework creator e.g., JSX is used in ReactJS and (Java example would also be nice) XML is used in BackBase.
 
 Whenever framework assembles application, it takes all the components and generates HTML which then is displayed in the browser. Most of the time this happens at the runtime ( in the browser or on the server ) but can be also done as 'separate' compilation task in a build process.
 
@@ -149,10 +151,20 @@ Flattening nature of the focusable nodes is becoming an obstacle for correct wor
 
 Assume we have a SignIn page of our application which is constructed of two components. One component represents Two input fields username and password and another component represents two buttons "Login" and "Forgot password". Let's call them, form and controls components.
 
+
+To show both components on the screen we would also need a "Page" component,
+which might look something like this: ( my own DSL :) )
+
+```xml
+<Body>
+  <Form />
+  <Controls />
+</Body>
+```
+
 (picture of a page with lines showing two components)
 
 I will show view fragments of components using HTML, assuming that it has been already 'geenerated' or compiled into it.
-
 
 View of the 'Form' component:
 
@@ -170,4 +182,21 @@ View of the 'Controls' component:
   <button value="Login" />
   <button value="Forgot password" />
 </div>
+```
+
+After assembling application it would in the browser something like this:
+
+```html
+<html>
+  <body>
+    <div>
+      User name: <input type="text" name="userame" />
+      Password: <input type="text" name="password" />
+    </div>
+    <div>
+      <button value="Login" />
+      <button value="Forgot password" />
+    </div>
+  </body>
+</html>
 ```
