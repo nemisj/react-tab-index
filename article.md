@@ -1,4 +1,4 @@
-# Focus order and tabIndex in component based web applications
+# Focus order and tabIndex greater then 0 in component based web applications
 
 Today we will look into the default focus order in the browser and why is it not applicable to the web applications based on component based frameworks like ReactJS, Angular, Sencha and others.
 
@@ -164,7 +164,7 @@ which might look something like this: ( my own DSL :) )
 
 (picture of a page with lines showing two components)
 
-I will show view fragments of components using HTML, assuming that it has been already 'geenerated' or compiled into it.
+I will show view fragments of components using HTML, assuming that it has been already 'generated' or compiled into it.
 
 View of the 'Form' component:
 
@@ -184,8 +184,7 @@ View of the 'Controls' component:
 </div>
 ```
 
-After assembling this application it would look like this: ( with comments I
-have highlithed where components starts and end )
+After assembling this application it would look like this: ( with comments I have highlighted where components starts and end )
 
 ```html
 <html>
@@ -213,4 +212,18 @@ have highlithed where components starts and end )
 </html>
 ```
 
+If running this in a browser you won't see any problem with focus order since
+focus will flow from top to bottom and will have correct order... until
+developer of this application, decided that he doesn't like "Form" component
+and want to replace it with the new one:
+
+
+'Form' component:
+
+```html
+<div>
+  User name: <input type="text" name="userame" />
+  Password: <input type="password" name="password" />
+</div>
+```
 
