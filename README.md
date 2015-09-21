@@ -1,2 +1,1 @@
-# react-tab-index
-TabIndex management in React application
+# TabIndex management in React applications
