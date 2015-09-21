@@ -4,7 +4,7 @@
   "description": "TabIndex management in React application",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --progress --colors",
+    "start-example": "cd examples && webpack-dev-server --hot --progress --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,11 +18,10 @@
   },
   "homepage": "https://github.com/nemisj/react-tab-index",
   "dependencies": {
-    "babel": "^5.8.21",
-    "react": "^0.13.3",
-    "webpack": "^1.12.0"
+    "react": "^0.13.3"
   },
   "devDependencies": {
+    "babel": "^5.8.21",
     "babel-core": "^5.8.22",
     "babel-loader": "^5.3.2",
     "react": "^0.13.3",
