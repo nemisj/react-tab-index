@@ -35,7 +35,7 @@ From our developers perspective, working of tab order is a bit different. There 
 
 Let's look at the following illustration:
 
-I will use HTML below as an example to clerify all the details:
+I will use HTML below as an example to clearify all the details:
 
 ```html
   <body>
@@ -53,8 +53,7 @@ I will use HTML below as an example to clerify all the details:
 To define the order of the elements following steps should be done:
 
 
-1. Flattened list of nodes is created from hyerarchy. All the nested nodes
-   should be placed under it's parent.
+1. Flattened list of nodes is created from hierarchy. All the nested nodes should be placed under it's parent.
 
 ```html
   <body>
@@ -78,13 +77,23 @@ To define the order of the elements following steps should be done:
 
 Now it's very easy to identify which element should be focused next.
 
-Elements will be ordered corresponding to this attribute in the flattende list.
-All the elements with the same tabIndex will be placed in the order they
-appear in the HTML document, from top to bottom starting from tabIndex 0.
-Whenever focusable element has. 
+## tabIndex greater then zero
 
-When browser has to deal with tabIndex attribute, there is a third step to
-normalization of the focus order.  Let's look at the HTML from above but with added tabIndex attribute and steps which needed to be pefromed for normalizing focus order list.
+Whenever tabIndex attribute is used inside elements, order will be defined based on this attribute in the flattened list. All the elements with the same tabIndex will be placed in the order they appear in the HTML document, from top to bottom.
+
+There is one little but important aspect to the tabIndex attribute. First browser will walk through the tabIndex with value greater then 0 and only then jump to the 0 tabIndex.  Also focusable element which have no tabIndex will be assigned tabIndex=0.
+
+(image)
+```html
+  <input type="text" tabIndex="1" value="tabIndex = 1" />
+  <input type="text" tabIndex="0" value="tabIndex = 0"/>
+  <input type="text" tabIndex="2" value="tabIndex = 2"/>
+  <input type="text" tabIndex="3" value="tabIndex = 3"/>
+```
+
+
+In order to normalize nodes with specified tabIndex, ther are two more steps needed. Let's look at the HTML from above but with added tabIndex attribute and steps which needed to be preformed for normalizing focus order list.
+
 
 ```html
   <body>
@@ -99,9 +108,7 @@ normalization of the focus order.  Let's look at the HTML from above but with ad
   </body
 ```
 
-1. Flattened list of nodes is created from hyerarchy. All the nested nodes
-   should be placed under it's parent.
-
+1. Flattened list of nodes is created from hierarchy. All the nested nodes should be placed under it's parent.
 
 ```html
   <body></body>
@@ -122,14 +129,22 @@ normalization of the focus order.  Let's look at the HTML from above but with ad
   <input type="text" id="four" tabIndex="2" />
 ```
 
-3. Sorting inputs based on tabIndex, use tabIndex=0 for nodes which have no
-   tabIndex
+3. Sorting inputs based on tabIndex, use tabIndex=0 for nodes which have no tabIndex
 
 ```html
   <input type="text" id="one" /> 
   <input type="text" id="three" tabIndex="1" />
   <input type="text" id="two" tabIndex="2" />
   <input type="text" id="four" tabIndex="2" />
+```
+
+4. Place all the nodes with tabIndex=0 bellow the latest tabIndex
+
+```html
+  <input type="text" id="three" tabIndex="1" />
+  <input type="text" id="two" tabIndex="2" />
+  <input type="text" id="four" tabIndex="2" />
+  <input type="text" id="one" /> 
 ```
 
 
@@ -170,8 +185,8 @@ View of the 'Form' component:
 
 ```html
 <div>
-  User name: <input type="text" name="userame" />
-  Password: <input type="text" name="password" />
+  <span>User name: </span><input type="text" name="userame" />
+  <span>Password: </span><input type="text" name="password" />
 </div>
 ```
 
@@ -212,18 +227,121 @@ After assembling this application it would look like this: ( with comments I hav
 </html>
 ```
 
-If running this in a browser you won't see any problem with focus order since
-focus will flow from top to bottom and will have correct order... until
-developer of this application, decided that he doesn't like "Form" component
+Running this won't give any problem with focus order since
+focus will flow from top to bottom and will have correct order... Until
+developer of this application, decided that he doesn't like "Controls" component
 and want to replace it with the new one:
 
 
-'Form' component:
+'Controls' component:
 
 ```html
 <div>
-  User name: <input type="text" name="userame" />
-  Password: <input type="password" name="password" />
+  <button value="Login" tabIndex="1"/>
+  <button value="Forgot password" tabIndex="0"/>
 </div>
 ```
+
+From the developers point of view there is nothing changed, he runs his
+component stand alone and sees that everything still working the same. Because
+after tabIndex > 0, focus goes to the tabIndex == 0, everything looks fine.
+
+
+Order of the nodes in focus list:
+
+```
+  <button value="Login" tabIndex="1"/>
+  <button value="Forgot password" tabIndex="0"/>
+``
+
+Somehow in production environment when application is assembeled together focus
+order is screwed up.
+
+## Exp.
+
+Let's look at the assembled HTML of an application after Batman made a change into 'Controls' component.
+
+```html
+<html>
+  <!-- Page -->
+  <body>
+
+    <!-- Form -->
+    <div>
+      User name: <input type="text" name="userame" />
+      Password: <input type="password" name="password" />
+    </div>
+    <!-- /Form -->
+
+    <!-- Controls -->
+    <div>
+      <button value="Login" tabIndex="1" />
+      <button value="Forgot password" tabIndex="0" type="password" />
+    </div>
+    <!-- /Controls -->
+
+  </body>
+
+  <!-- /Page -->
+
+</html>
+```
+
+Because view fragments of components of assembled application all come into one document, order of the focus list becomes different. Let's see how list would look like:
+
+```html
+  <button value="Login" tabIndex="1" />
+  <input type="text" name="userame" />
+  <input type="password" name="password" />
+  <button value="Forgot password" tabIndex="0" type="password" />
+```
+
+Due to the flattening of nodes from different components, focus order is
+incorrect.
+
+## How make it work
+
+In order to solve this, browser need to have a notion of a component and apply the same prinicple of flattening focus-list to every component separatly. Only then will the order be 'respected' in every component. Which actually makes this list not flat anymore but hyerarchical.
+
+(image)
+
+
+<<<<
+
+Let's take our example and try to create focusable tree. To do so, first create
+flat tree as we did before, but don't flatten nodes, if they're part of the
+component.
+
+Step 1: Flattening tree for document
+```html
+<html>
+</html>
+<body>
+</body>
+<div data-component-name="Form"></div>
+<div data-component-name="Controls"></div>
+
+```
+
+This would be our flat tree of Document. Now Time to flatten both Components:
+
+Step 1: Flattening tree for Form
+
+```html
+<div></div>
+<span>User name: </span>
+<input type="text" name="userame" />
+<span>Password: </span>
+<input type="password" name="password" />
+```
+
+Step 1: Flattening tree for Controls component
+
+```html
+<div></div>
+<button value="Login" tabIndex="1" />
+<button value="Forgot password" tabIndex="0" type="password" />
+```
+
+
 
