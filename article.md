@@ -252,7 +252,7 @@ Order of the nodes in focus list:
 ```
   <button value="Login" tabIndex="1"/>
   <button value="Forgot password" tabIndex="0"/>
-``
+```
 
 Somehow in production environment when application is assembeled together focus
 order is screwed up.
