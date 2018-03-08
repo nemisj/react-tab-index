@@ -12,7 +12,7 @@ var Child = React.createClass({
     console.log('this.props', this.props);
     return (
       <div style={{ border: '1px green dashed', margin: '3px', padding: '5px'}}>
-        This is Child component with {this.props.tabIndex} tabIndex
+        This is Child component with  tabIndex={this.props.tabIndex}
         <div>
           <div tabIndex="2">Child.tabIndex=2</div>
         </div>
@@ -37,7 +37,8 @@ function t(Component) {
       tabIndex: React.PropTypes.string
     },
     render: function () {
-      return React.createElement(Component, this.children, this.props);
+      // console.log('t', this.props, this.children);
+      return React.createElement(Component, this.props);
     }
 
   });
